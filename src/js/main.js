@@ -312,8 +312,9 @@ const searchManager = new SearchManager();
 document.addEventListener('DOMContentLoaded', function() {
     // Проверяем, находимся ли мы на странице магазина
     if (window.location.pathname === '/shop' || document.querySelector('.shop-container')) {
-        // Используем новый интерфейс магазина
-        // window.shopManager = new ShopManager(); // Удалите или закомментируйте эту строку
+        // Инициализируем ProductManager для страницы магазина
+        window.productManager = new ProductManager();
+        window.productManagerInitialized = true;
         return;
     }
     

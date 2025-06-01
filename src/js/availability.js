@@ -105,21 +105,57 @@ class AvailabilityService {
      */
     updateUI(data) {
         Object.entries(data).forEach(([productId, info]) => {
-            const row = document.querySelector(`tr[data-product-id="${productId}"]`);
-            if (!row) return;
+            // Ищем элементы как по data-product-id атрибуту, так и по классам
+            const rows = document.querySelectorAll(`[data-product-id="${productId}"]`);
+            
+            rows.forEach(row => {
+                // Наличие - используем единый формат
+                const availCells = row.querySelectorAll('.availability-cell, .col-availability span, .product-availability .availability-text');
+                availCells.forEach(cell => {
+                    if (cell) {
+                        const text = info.availability_text || (info.quantity > 0 ? `${info.quantity} шт.` : 'Нет');
+                        cell.textContent = text;
+                        
+                        // Обновляем классы для визуального отображения
+                        if (cell.classList.contains('availability-cell') || cell.parentElement.classList.contains('col-availability')) {
+                            cell.className = info.quantity > 10 ? 'text-success' : info.quantity > 0 ? 'text-warning' : 'text-danger';
+                        }
+                        
+                        // Для карточек товаров
+                        const availabilityBlock = cell.closest('.product-availability');
+                        if (availabilityBlock) {
+                            availabilityBlock.classList.remove('in-stock', 'out-of-stock');
+                            availabilityBlock.classList.add(info.quantity > 0 ? 'in-stock' : 'out-of-stock');
+                        }
+                    }
+                });
     
-            // Наличие - используем единый формат
-            const availCell = row.querySelector('.availability-cell, .col-availability span');
-            if (availCell) {
-                availCell.textContent = info.availability_text || (info.quantity > 0 ? `${info.quantity} шт.` : 'Нет');
-                availCell.className = info.quantity > 10 ? 'text-success' : info.quantity > 0 ? 'text-warning' : 'text-danger';
-            }
-    
-            // Дата доставки
-            const dateCell = row.querySelector('.delivery-date-cell, .col-delivery-date span');
-            if (dateCell) {
-                dateCell.textContent = info.delivery_text || info.delivery_date || '—';
-            }
+                // Дата доставки
+                const dateCells = row.querySelectorAll('.delivery-date-cell, .col-delivery-date span');
+                dateCells.forEach(cell => {
+                    if (cell) {
+                        cell.textContent = info.delivery_text || info.delivery_date || '—';
+                    }
+                });
+                
+                // Обновляем цены если они пришли
+                if (info.price !== undefined && info.price !== null) {
+                    const priceCells = row.querySelectorAll('.product-price, .col-price span');
+                    priceCells.forEach(cell => {
+                        if (cell) {
+                            cell.textContent = `${info.price.toFixed(2)} ₽`;
+                        }
+                    });
+                }
+                
+                // Обновляем кнопку "В корзину"
+                const addToCartBtns = row.querySelectorAll('.btn-add-to-cart, .add-to-cart-btn');
+                addToCartBtns.forEach(btn => {
+                    if (btn) {
+                        btn.disabled = info.quantity === 0;
+                    }
+                });
+            });
         });
     }
 

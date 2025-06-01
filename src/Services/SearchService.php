@@ -33,10 +33,11 @@ class SearchService
                 $duration = round((microtime(true) - $startTime) * 1000, 2);
                 Logger::info("✅ [$requestId] Completed in {$duration}ms");
                 
-                return $result;
+                return ['success' => true, 'data' => $result];
             } else {
                 Logger::warning("⚠️ [$requestId] OpenSearch unavailable, using MySQL");
-                return self::searchViaMySQL($params);
+                $result = self::searchViaMySQL($params);
+                return ['success' => true, 'data' => $result];
             }
             
         } catch (\Exception $e) {
@@ -52,14 +53,16 @@ class SearchService
                 'success' => false,
                 'error' => 'Search service temporarily unavailable',
                 'error_code' => 'SERVICE_UNAVAILABLE',
-                'products' => [],
-                'total' => 0,
-                'page' => $params['page'] ?? 1,
-                'limit' => $params['limit'] ?? 20,
-                'debug_info' => [
-                    'request_id' => $requestId,
-                    'duration_ms' => $duration,
-                    'timestamp' => date('c')
+                'data' => [
+                    'products' => [],
+                    'total' => 0,
+                    'page' => $params['page'] ?? 1,
+                    'limit' => $params['limit'] ?? 20,
+                    'debug_info' => [
+                        'request_id' => $requestId,
+                        'duration_ms' => $duration,
+                        'timestamp' => date('c')
+                    ]
                 ]
             ];
         }

@@ -170,6 +170,7 @@ export class ProductManager {
     /**
      * Загрузка товаров
      */
+
     async loadProducts() {
         if (this.state.isLoading) return;
 
@@ -192,9 +193,13 @@ export class ProductManager {
             // Вызов API
             const result = await productService.search(params);
 
-            if (result.success) {
-                this.state.products = result.data.products || [];
-                this.state.totalProducts = result.data.total || 0;
+            if (result.success !== false && result.data) {
+                // Проверяем, что данные есть (для совместимости с разными форматами ответа)
+                const products = result.data.products || result.products || [];
+                const total = result.data.total || result.total || 0;
+                
+                this.state.products = products;
+                this.state.totalProducts = total;
                 this.state.totalPages = Math.ceil(this.state.totalProducts / this.state.itemsPerPage);
 
                 console.log(`✅ Загружено ${this.state.products.length} из ${this.state.totalProducts} товаров`);
